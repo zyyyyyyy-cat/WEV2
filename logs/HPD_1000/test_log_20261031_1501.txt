@@ -1,0 +1,250 @@
+2026-10-31 15:01:11,550 transreid INFO: Namespace(config_file='configs/HPD_UAD.yml', opts=['MODEL.DIST_TRAIN', 'False', 'MODEL.PRETRAIN_PATH', '/project/code/data/jx_vit_base_p16_224-80ecf9dd.pth', 'DATASETS.ROOT_DIR', '/project/code/data', 'TEST.WEIGHT', 'logs/HPD_1000_DDP/transformer_120.pth', 'TEST.DETAILED_DOMAIN_EVAL', 'True', 'OUTPUT_DIR', 'logs/HPD_1000_domain'])
+2026-10-31 15:01:11,550 transreid INFO: Loaded configuration file configs/HPD_UAD.yml
+2026-10-31 15:01:11,550 transreid INFO: 
+# HPD: shared identity prototype + modality sub-centers.
+# One main run: alpha=0.75 (scene 75%, shared 25%), 4-GPU DDP,
+# batch 256, LR 0.032, 120 epochs.
+# Single GPU: override SOLVER.IMS_PER_BATCH 64 and SOLVER.BASE_LR 0.008.
+MODEL:
+  PRETRAIN_CHOICE: 'imagenet'
+  PRETRAIN_PATH: 'jx_vit_base_p16_224-80ecf9dd.pth'
+  METRIC_LOSS_TYPE: 'wrt'
+  IF_LABELSMOOTH: 'off'
+  IF_WITH_CENTER: 'no'
+  NAME: 'transformer'
+  NO_MARGIN: True
+  TRANSFORMER_TYPE: 'vit_base_in'
+  STRIDE_SIZE: [16, 16]
+  PCA_LOSS_WEIGHT: 0.01
+  GPD_MOMENTUM: 0.2
+
+  # HPD
+  GPD_TYPE: 'hierarchical'
+  GPD_SUB_CENTERS: 3
+  GPD_SCENE_WEIGHT: 0.75
+  GPD_SHARED_MOMENTUM: 0.2
+  GPD_TAU: 0.03
+  GPD_COUNT_EMA: True
+  GPD_EMA_MIN: 0.1
+  GPD_EMA_MAX: 0.5
+  GPD_WARMSTART: True
+  GPD_DIAG_PERIOD: 100
+
+INPUT:
+  SIZE_TRAIN: [256, 128]
+  SIZE_TEST: [256, 128]
+  PROB: 0.5
+  RE_PROB: 0.5
+  PADDING: 10
+  PIXEL_MEAN: [0.5, 0.5, 0.5]
+  PIXEL_STD: [0.5, 0.5, 0.5]
+
+DATASETS:
+  NAMES: ('WHU-MARS')
+  ROOT_DIR: ('/project/code/data')
+  MODALITIES: ['RGB', 'IR', 'Thermal']
+
+DATALOADER:
+  SAMPLER: 'PKM'
+  NUM_INSTANCE: 4
+  NUM_WORKERS: 8
+
+SOLVER:
+  OPTIMIZER_NAME: 'SGD'
+  MAX_EPOCHS: 120
+  BASE_LR: 0.032
+  IMS_PER_BATCH: 256
+  SEED: 1234
+  WARMUP_METHOD: 'linear'
+  WARMUP_EPOCHS: 5
+  CHECKPOINT_PERIOD: 20
+  LOG_PERIOD: 50
+  EVAL_PERIOD: 10
+  WEIGHT_DECAY: 1e-4
+  WEIGHT_DECAY_BIAS: 1e-4
+  BIAS_LR_FACTOR: 2
+  LOSS_TYPE: "base+pca+gpd"
+
+TEST:
+  IMS_PER_BATCH: 512
+  RE_RANKING: False
+  NECK_FEAT: 'before'
+  FEAT_NORM: 'yes'
+
+OUTPUT_DIR: './logs/HPD_1000_DDP'
+
+2026-10-31 15:01:11,550 transreid INFO: Running with config:
+DATALOADER:
+  NUM_INSTANCE: 4
+  NUM_WORKERS: 8
+  SAMPLER: PKM
+DATASETS:
+  DATASET_DIR: WHU-MARS
+  FILTER_GD: False
+  MODALITIES: ('RGB', 'IR', 'Thermal')
+  NAMES: WHU-MARS
+  ROOT_DIR: /project/code/data
+INPUT:
+  PADDING: 10
+  PIXEL_MEAN: [0.5, 0.5, 0.5]
+  PIXEL_STD: [0.5, 0.5, 0.5]
+  PROB: 0.5
+  RE_PROB: 0.5
+  SIZE_TEST: [256, 128]
+  SIZE_TRAIN: [256, 128]
+MODEL:
+  ATT_DROP_RATE: 0.0
+  COS_LAYER: False
+  DEVICE: cuda
+  DEVICE_ID: 0
+  DEVIDE_LENGTH: 4
+  DIST_TRAIN: False
+  DROP_OUT: 0.0
+  DROP_PATH: 0.1
+  GPD_COUNT_EMA: True
+  GPD_DIAG_PERIOD: 100
+  GPD_EMA_MAX: 0.5
+  GPD_EMA_MIN: 0.1
+  GPD_MOMENTUM: 0.2
+  GPD_SCENE_WEIGHT: 0.75
+  GPD_SHARED_MOMENTUM: 0.2
+  GPD_SUB_CENTERS: 3
+  GPD_TAU: 0.03
+  GPD_TYPE: hierarchical
+  GPD_WARMSTART: True
+  ID_LOSS_TYPE: softmax
+  ID_LOSS_WEIGHT: 1.0
+  IF_LABELSMOOTH: off
+  IF_WITH_CENTER: no
+  JPM: False
+  LAST_STRIDE: 1
+  METRIC_LOSS_TYPE: wrt
+  NAME: transformer
+  NECK: bnneck
+  NO_MARGIN: True
+  PCA_LOSS_WEIGHT: 0.01
+  PRETRAIN_CHOICE: imagenet
+  PRETRAIN_PATH: /project/code/data/jx_vit_base_p16_224-80ecf9dd.pth
+  RE_ARRANGE: True
+  SHIFT_NUM: 5
+  SHUFFLE_GROUP: 2
+  SIE_CAMERA: False
+  SIE_COE: 3.0
+  SIE_VIEW: False
+  STRIDE_SIZE: [16, 16]
+  TRANSFORMER_TYPE: vit_base_in
+  TRIPLET_LOSS_WEIGHT: 1.0
+OUTPUT_DIR: logs/HPD_1000_domain
+SOLVER:
+  BASE_LR: 0.032
+  BIAS_LR_FACTOR: 2
+  CENTER_LOSS_WEIGHT: 0.0005
+  CENTER_LR: 0.5
+  CHECKPOINT_PERIOD: 20
+  COSINE_MARGIN: 0.5
+  COSINE_SCALE: 30
+  EVAL_PERIOD: 10
+  GAMMA: 0.1
+  IMS_PER_BATCH: 256
+  LARGE_FC_LR: False
+  LOG_PERIOD: 50
+  LOSS_TYPE: base+pca+gpd
+  MARGIN: 0.3
+  MAX_EPOCHS: 120
+  MOMENTUM: 0.9
+  OPTIMIZER_NAME: SGD
+  SEED: 1234
+  STEPS: (40, 70)
+  WARMUP_EPOCHS: 5
+  WARMUP_FACTOR: 0.01
+  WARMUP_METHOD: linear
+  WEIGHT_DECAY: 0.0001
+  WEIGHT_DECAY_BIAS: 0.0001
+TEST:
+  DETAILED_DOMAIN_EVAL: True
+  DIST_MAT: dist_mat.npy
+  EVAL: False
+  FEAT_NORM: yes
+  IMS_PER_BATCH: 512
+  NECK_FEAT: before
+  RE_RANKING: False
+  TOP_K_EVAL: 0
+  WEIGHT: logs/HPD_1000_DDP/transformer_120.pth
+2026-10-31 15:01:18,204 transreid.test INFO: Enter inferencing
+2026-10-31 15:04:20,594 transreid.test INFO: => Split mode 1: query 2135, total query 2135
+2026-10-31 15:04:20,635 transreid.test INFO: => Split mode 2: query 2135, total query 4270
+2026-10-31 15:04:20,668 transreid.test INFO: => Split mode 3: query 2135, total query 6405
+2026-10-31 15:04:20,707 transreid.test INFO: The test feature is normalized
+2026-10-31 15:04:20,763 transreid.test INFO: => Computing DistMat in q-chunks (chunk=4000)
+2026-10-31 15:05:38,656 transreid.test INFO: Starting modality-pair specific evaluation. Query mods: [1, 2, 3], Gallery mods: [1, 2, 3]
+2026-10-31 15:05:46,505 transreid.test INFO:   Pair (Q:1, G:1) -> Rank-1: 42.20%, mAP: 27.52%, mINP: 5.34%
+2026-10-31 15:05:54,688 transreid.test INFO:   Pair (Q:1, G:2) -> Rank-1: 27.12%, mAP: 16.50%, mINP: 2.33%
+2026-10-31 15:06:02,392 transreid.test INFO:   Pair (Q:1, G:3) -> Rank-1: 7.26%, mAP: 5.71%, mINP: 1.05%
+2026-10-31 15:06:10,115 transreid.test INFO:   Pair (Q:2, G:1) -> Rank-1: 25.25%, mAP: 16.11%, mINP: 2.93%
+2026-10-31 15:06:17,908 transreid.test INFO:   Pair (Q:2, G:2) -> Rank-1: 29.60%, mAP: 17.80%, mINP: 2.52%
+2026-10-31 15:06:25,665 transreid.test INFO:   Pair (Q:2, G:3) -> Rank-1: 7.03%, mAP: 5.29%, mINP: 1.04%
+2026-10-31 15:06:33,344 transreid.test INFO:   Pair (Q:3, G:1) -> Rank-1: 7.59%, mAP: 5.98%, mINP: 1.31%
+2026-10-31 15:06:41,015 transreid.test INFO:   Pair (Q:3, G:2) -> Rank-1: 8.06%, mAP: 5.39%, mINP: 0.98%
+2026-10-31 15:06:48,670 transreid.test INFO:   Pair (Q:3, G:3) -> Rank-1: 21.12%, mAP: 14.55%, mINP: 2.60%
+2026-10-31 15:06:48,670 transreid.test INFO: VI-ReID results (Table 5 protocol):
+2026-10-31 15:06:48,670 transreid.test INFO:   Setting   Rank-1     mAP    mINP
+2026-10-31 15:06:48,670 transreid.test INFO:   NIR->RGB    25.25%  16.11%   2.93%
+2026-10-31 15:06:48,671 transreid.test INFO:   TIR->RGB     7.59%   5.98%   1.31%
+2026-10-31 15:06:48,671 transreid.test INFO: Modality-pair results (Table 6 protocol):
+2026-10-31 15:06:48,671 transreid.test INFO:   Query Gallery  Rank-1     mAP    mINP
+2026-10-31 15:06:48,671 transreid.test INFO:     RGB     RGB  42.20%  27.52%   5.34%
+2026-10-31 15:06:48,671 transreid.test INFO:     RGB     NIR  27.12%  16.50%   2.33%
+2026-10-31 15:06:48,671 transreid.test INFO:     RGB     TIR   7.26%   5.71%   1.05%
+2026-10-31 15:06:48,671 transreid.test INFO:     NIR     RGB  25.25%  16.11%   2.93%
+2026-10-31 15:06:48,671 transreid.test INFO:     NIR     NIR  29.60%  17.80%   2.52%
+2026-10-31 15:06:48,671 transreid.test INFO:     NIR     TIR   7.03%   5.29%   1.04%
+2026-10-31 15:06:48,671 transreid.test INFO:     TIR     RGB   7.59%   5.98%   1.31%
+2026-10-31 15:06:48,671 transreid.test INFO:     TIR     NIR   8.06%   5.39%   0.98%
+2026-10-31 15:06:48,671 transreid.test INFO:     TIR     TIR  21.12%  14.55%   2.60%
+2026-10-31 15:06:48,672 transreid.test INFO: AG-ReID results (Table 4 protocol; all modalities):
+2026-10-31 15:07:00,029 transreid.test INFO:   A->G -> mAP: 12.10%, Rank-1: 34.74%, Rank-10: 60.89%
+2026-10-31 15:07:12,235 transreid.test INFO:   G->A -> mAP: 13.93%, Rank-1: 32.14%, Rank-10: 57.92%
+2026-10-31 15:07:12,795 transreid.test INFO: Detailed modality-platform evaluation (same-camera gallery samples excluded for every query):
+2026-10-31 15:07:12,796 transreid.test INFO:   Category                                  Query->Gallery       Query Gallery ValidQ  Rank-1     mAP    mINP
+2026-10-31 15:07:17,354 transreid.test INFO:   same_modality_same_platform               RGB-G->RGB-G    1685   23422   1510  42.25%  29.24%   7.08%
+2026-10-31 15:07:17,362 transreid.test INFO:   same_modality_same_platform               RGB-A->RGB-A     450    7781      0  SKIPPED (no_valid_query_after_same_camera_exclusion)
+2026-10-31 15:07:21,914 transreid.test INFO:   same_modality_same_platform               NIR-G->NIR-G    1685   23422   1510  27.35%  17.80%   3.53%
+2026-10-31 15:07:21,921 transreid.test INFO:   same_modality_same_platform               NIR-A->NIR-A     450    7781      0  SKIPPED (no_valid_query_after_same_camera_exclusion)
+2026-10-31 15:07:26,632 transreid.test INFO:   same_modality_same_platform               TIR-G->TIR-G    1685   23422   1510  21.79%  15.82%   3.33%
+2026-10-31 15:07:26,641 transreid.test INFO:   same_modality_same_platform               TIR-A->TIR-A     450    7781      0  SKIPPED (no_valid_query_after_same_camera_exclusion)
+2026-10-31 15:07:31,249 transreid.test INFO:   modality_only_ground                      RGB-G->NIR-G    1685   23422   1510  27.81%  17.69%   3.17%
+2026-10-31 15:07:35,738 transreid.test INFO:   modality_only_ground                      NIR-G->RGB-G    1685   23422   1510  25.63%  17.30%   3.73%
+2026-10-31 15:07:40,423 transreid.test INFO:   modality_only_ground                      RGB-G->TIR-G    1685   23422   1510   7.28%   6.35%   1.36%
+2026-10-31 15:07:45,117 transreid.test INFO:   modality_only_ground                      TIR-G->RGB-G    1685   23422   1510   8.15%   6.78%   1.69%
+2026-10-31 15:07:49,559 transreid.test INFO:   modality_only_ground                      NIR-G->TIR-G    1685   23422   1510   6.42%   5.60%   1.31%
+2026-10-31 15:07:53,965 transreid.test INFO:   modality_only_ground                      TIR-G->NIR-G    1685   23422   1510   8.21%   6.00%   1.31%
+2026-10-31 15:07:53,976 transreid.test INFO:   modality_only_aerial                      RGB-A->NIR-A     450    7781      0  SKIPPED (no_valid_query_after_same_camera_exclusion)
+2026-10-31 15:07:53,987 transreid.test INFO:   modality_only_aerial                      NIR-A->RGB-A     450    7781      0  SKIPPED (no_valid_query_after_same_camera_exclusion)
+2026-10-31 15:07:53,998 transreid.test INFO:   modality_only_aerial                      RGB-A->TIR-A     450    7781      0  SKIPPED (no_valid_query_after_same_camera_exclusion)
+2026-10-31 15:07:54,007 transreid.test INFO:   modality_only_aerial                      TIR-A->RGB-A     450    7781      0  SKIPPED (no_valid_query_after_same_camera_exclusion)
+2026-10-31 15:07:54,014 transreid.test INFO:   modality_only_aerial                      NIR-A->TIR-A     450    7781      0  SKIPPED (no_valid_query_after_same_camera_exclusion)
+2026-10-31 15:07:54,022 transreid.test INFO:   modality_only_aerial                      TIR-A->NIR-A     450    7781      0  SKIPPED (no_valid_query_after_same_camera_exclusion)
+2026-10-31 15:07:55,256 transreid.test INFO:   platform_only                             RGB-G->RGB-A    1685    7781    644  43.48%  32.38%  11.06%
+2026-10-31 15:07:56,552 transreid.test INFO:   platform_only                             RGB-A->RGB-G     450   23422    450  43.11%  28.95%   5.28%
+2026-10-31 15:07:57,854 transreid.test INFO:   platform_only                             NIR-G->NIR-A    1685    7781    644  34.47%  25.42%   5.69%
+2026-10-31 15:07:59,149 transreid.test INFO:   platform_only                             NIR-A->NIR-G     450   23422    450  36.00%  20.87%   2.89%
+2026-10-31 15:08:00,422 transreid.test INFO:   platform_only                             TIR-G->TIR-A    1685    7781    644  22.98%  16.60%   4.53%
+2026-10-31 15:08:01,661 transreid.test INFO:   platform_only                             TIR-A->TIR-G     450   23422    450  23.56%  14.60%   2.34%
+2026-10-31 15:08:02,953 transreid.test INFO:   modality_and_platform_ground_to_aerial    RGB-G->NIR-A    1685    7781    644  27.17%  21.17%   4.91%
+2026-10-31 15:08:04,210 transreid.test INFO:   modality_and_platform_ground_to_aerial    RGB-G->TIR-A    1685    7781    644   6.68%   6.56%   2.18%
+2026-10-31 15:08:05,507 transreid.test INFO:   modality_and_platform_ground_to_aerial    NIR-G->RGB-A    1685    7781    644  20.34%  16.50%   4.68%
+2026-10-31 15:08:06,759 transreid.test INFO:   modality_and_platform_ground_to_aerial    NIR-G->TIR-A    1685    7781    644   6.68%   6.66%   2.02%
+2026-10-31 15:08:08,036 transreid.test INFO:   modality_and_platform_ground_to_aerial    TIR-G->RGB-A    1685    7781    644   7.45%   7.38%   2.55%
+2026-10-31 15:08:09,305 transreid.test INFO:   modality_and_platform_ground_to_aerial    TIR-G->NIR-A    1685    7781    644   7.61%   7.31%   2.12%
+2026-10-31 15:08:10,608 transreid.test INFO:   modality_and_platform_aerial_to_ground    RGB-A->NIR-G     450   23422    450  24.22%  15.21%   2.24%
+2026-10-31 15:08:11,871 transreid.test INFO:   modality_and_platform_aerial_to_ground    RGB-A->TIR-G     450   23422    450   8.44%   6.41%   1.23%
+2026-10-31 15:08:13,124 transreid.test INFO:   modality_and_platform_aerial_to_ground    NIR-A->RGB-G     450   23422    450  30.44%  18.13%   3.15%
+2026-10-31 15:08:14,467 transreid.test INFO:   modality_and_platform_aerial_to_ground    NIR-A->TIR-G     450   23422    450  10.22%   6.38%   1.25%
+2026-10-31 15:08:15,715 transreid.test INFO:   modality_and_platform_aerial_to_ground    TIR-A->RGB-G     450   23422    450   6.22%   5.79%   1.25%
+2026-10-31 15:08:17,016 transreid.test INFO:   modality_and_platform_aerial_to_ground    TIR-A->NIR-G     450   23422    450   8.22%   5.23%   1.05%
+2026-10-31 15:08:17,017 transreid.test INFO: => Detailed protocol CSV saved to logs/HPD_1000_domain/domain_protocol_results.csv
+2026-10-31 15:08:17,061 transreid.test INFO: Validation Results 
+2026-10-31 15:08:17,061 transreid.test INFO: mAP: 11.47%
+2026-10-31 15:08:17,061 transreid.test INFO: CMC curve, Rank-1  :30.52%
+2026-10-31 15:08:17,061 transreid.test INFO: CMC curve, Rank-5  :47.51%
+2026-10-31 15:08:17,061 transreid.test INFO: CMC curve, Rank-10 :56.14%
